@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia OOP App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <div id="view-menu" class="view active">
+            <h1>Trivia Quest</h1>
+            <p>Alege dificultatea, răspunde la 10 întrebări și testează-ți cunoștințele!</p>
+            <div class="diff-selector text-center">
+                <label for="select-diff">Nivel Dificultate:</label>
+                <select id="select-diff" class="input-styled">
+                    <option value="1">Nivel 1 (Ușor)</option>
+                    <option value="2">Nivel 2 (Mediu)</option>
+                    <option value="3">Nivel 3 (Avansat)</option>
+                </select>
+            </div>
+            <div class="btn-group mt">
+                <button id="btn-start" class="btn btn-primary">Începe Jocul</button>
+                <button id="btn-admin-enter" class="btn btn-secondary">Mod Profesor</button>
+            </div>
+        </div>
+
+        <div id="view-game" class="view">
+            <div class="top-nav">
+                <button id="btn-home-game" class="btn btn-secondary btn-small">🏠 Acasă</button>
+            </div>
+            <div class="stats-bar">
+                <span class="badge" id="q-counter">Întrebarea 1 / 10</span>
+                <span class="badge badge-blue" id="diff-text">Dificultate: 1</span>
+            </div>
+            <h2 id="question-text" class="question">Se încarcă...</h2>
+            <div id="answers-container" class="answers-grid"></div>
+            <div class="text-center mt">
+                <button id="btn-next-q" class="btn btn-primary hidden">Următoarea Întrebare ➔</button>
+            </div>
+        </div>
+
+        <div id="view-game-over" class="view text-center">
+            <h2 id="end-message">Rezultate Finale</h2>
+            <div class="results-box">
+                <p>Scor curent: <strong id="final-score" class="text-blue">0</strong> / 10</p>
+                <p>Răspunsuri Corecte: <span id="correct-count" class="text-green">0</span></p>
+                <p>Răspunsuri Greșite: <span id="wrong-count" class="text-red">0</span></p>
+                <p class="mt">🏆 High Score Absolut: <strong id="high-score-display">0</strong></p>
+            </div>
+            <div class="btn-group mt">
+                <button id="btn-restart" class="btn btn-primary">Joacă din nou</button>
+                <button id="btn-next-level" class="btn btn-success hidden">Treci la Nivelul Următor!</button>
+                <button id="btn-back" class="btn btn-secondary">Meniu</button>
+            </div>
+        </div>
+
+        <div id="view-admin" class="view">
+            <div class="admin-header">
+                <h2>Bază de date Întrebări</h2>
+                <button id="btn-exit-admin" class="btn-danger-text">Închide</button>
+            </div>
+            <form id="admin-form" class="admin-form">
+                <h3 id="form-title">Adaugă Întrebare Nouă</h3>
+                <input type="hidden" id="edit-id" value="">
+                <input type="text" id="add-q" placeholder="Întrebarea" required class="input-styled">
+                <input type="text" id="add-correct" placeholder="Răspuns Corect" required class="input-styled border-green">
+                <input type="text" id="add-w1" placeholder="Greșit 1" required class="input-styled border-red">
+                <input type="text" id="add-w2" placeholder="Greșit 2" required class="input-styled border-red">
+                <input type="text" id="add-w3" placeholder="Greșit 3" required class="input-styled border-red">
+                <div class="mt text-center">
+                    <label>Dificultate:</label>
+                    <input type="number" id="add-diff" min="1" max="3" value="1" required class="input-styled w-auto">
+                </div>
+                <div class="btn-group mt">
+                    <button type="submit" id="btn-submit-admin" class="btn btn-success">Salvează</button>
+                    <button type="button" id="btn-cancel-edit" class="btn btn-secondary hidden">Anulează Editarea</button>
+                </div>
+            </form>
+            <ul id="admin-list" class="admin-list"></ul>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

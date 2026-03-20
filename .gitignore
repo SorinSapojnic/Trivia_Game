@@ -1,0 +1,5 @@
+# Ignoră pachetele Node.js
+backend/node_modules/
+
+# Ignoră fișierele de sistem macOS
+.DS_Store
