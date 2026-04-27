@@ -1,47 +1,93 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = 3000;
-const DB_FILE = path.join(__dirname, 'database.json');
 
 app.use(cors());
 app.use(express.json());
 
-const readDatabase = () => JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
-const writeDatabase = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+// 1. Conexiunea la MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('Conectat cu succes la MongoDB Atlas (Cloud)!'))
+    .catch(err => console.error('Eroare la conectarea MongoDB:', err));
 
-app.get('/api/questions', (req, res) => res.json(readDatabase()));
-
-app.post('/api/questions', (req, res) => {
-    const questions = readDatabase();
-    const newQ = { id: Date.now(), ...req.body, difficulty: parseInt(req.body.difficulty) };
-    questions.push(newQ);
-    writeDatabase(questions);
-    res.status(201).json(newQ);
+// 2. Definirea Schemei pentru o Întrebare
+const questionSchema = new mongoose.Schema({
+    question: { type: String, required: true },
+    correctAnswer: { type: String, required: true },
+    wrongAnswers: { type: [String], required: true },
+    difficulty: { type: Number, required: true }
 });
 
-// Ruta NOUĂ pentru editare
-app.put('/api/questions/:id', (req, res) => {
-    let questions = readDatabase();
-    const id = parseInt(req.params.id);
-    const index = questions.findIndex(q => q.id === id);
-    if (index !== -1) {
-        questions[index] = { id, ...req.body, difficulty: parseInt(req.body.difficulty) };
-        writeDatabase(questions);
-        res.json(questions[index]);
-    } else {
-        res.status(404).json({ error: "Întrebarea nu a fost găsită" });
+// Modelul cu care vom interacționa
+const Question = mongoose.model('Question', questionSchema);
+
+// --- RUTE API RESTful ---
+
+// GET: Preluarea tuturor întrebărilor
+app.get('/api/questions', async (req, res) => {
+    try {
+        const questions = await Question.find();
+        // MongoDB folosește "_id". Mapăm rezultatele pentru a trimite "id" simplu către frontend
+        const formatted = questions.map(q => ({
+            id: q._id.toString(),
+            question: q.question,
+            correctAnswer: q.correctAnswer,
+            wrongAnswers: q.wrongAnswers,
+            difficulty: q.difficulty
+        }));
+        res.json(formatted);
+    } catch (error) {
+        res.status(500).json({ error: "Eroare la preluarea datelor" });
     }
 });
 
-app.delete('/api/questions/:id', (req, res) => {
-    let questions = readDatabase();
-    questions = questions.filter(q => q.id !== parseInt(req.params.id));
-    writeDatabase(questions);
-    res.json({ message: 'Întrebare ștearsă' });
+// POST: Adăugarea unei întrebări noi
+app.post('/api/questions', async (req, res) => {
+    try {
+        const newQuestion = new Question({
+            question: req.body.question,
+            correctAnswer: req.body.correctAnswer,
+            wrongAnswers: req.body.wrongAnswers,
+            difficulty: parseInt(req.body.difficulty)
+        });
+        const savedQ = await newQuestion.save();
+        res.status(201).json({ ...savedQ._doc, id: savedQ._id.toString() });
+    } catch (error) {
+        res.status(500).json({ error: "Eroare la salvarea întrebării" });
+    }
 });
 
-app.listen(PORT, () => console.log(`Backend rulând pe http://localhost:${PORT}`));
+// PUT: Editarea unei întrebări
+app.put('/api/questions/:id', async (req, res) => {
+    try {
+        const updatedQ = await Question.findByIdAndUpdate(
+            req.params.id, 
+            {
+                question: req.body.question,
+                correctAnswer: req.body.correctAnswer,
+                wrongAnswers: req.body.wrongAnswers,
+                difficulty: parseInt(req.body.difficulty)
+            }, 
+            { new: true } // Returnează documentul actualizat
+        );
+        res.json(updatedQ);
+    } catch (error) {
+        res.status(500).json({ error: "Eroare la editare" });
+    }
+});
+
+// DELETE: Ștergerea unei întrebări
+app.delete('/api/questions/:id', async (req, res) => {
+    try {
+        await Question.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Întrebare ștearsă din Cloud' });
+    } catch (error) {
+        res.status(500).json({ error: "Eroare la ștergere" });
+    }
+});
+
+app.listen(PORT, () => console.log(`Serverul rulează pe http://localhost:${PORT}`));

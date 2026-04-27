@@ -161,8 +161,8 @@ class TriviaApp {
             li.innerHTML = `
                 <span style="flex:1;"><strong>[Niv ${q.difficulty}]</strong> ${q.question}</span>
                 <div class="admin-actions">
-                    <button class="btn-edit-text" onclick="app.populateEditForm(${q.id})">Editează</button>
-                    <button class="btn-danger-text" onclick="app.deleteQuestion(${q.id})">Șterge</button>
+                    <button class="btn-edit-text" onclick="app.populateEditForm('${q.id}')">Editează</button>
+                    <button class="btn-danger-text" onclick="app.deleteQuestion('${q.id}')">Șterge</button>
                 </div>
             `;
             list.appendChild(li);
